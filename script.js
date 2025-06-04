@@ -79,7 +79,7 @@ function myCode() {
     )
 }
 
-function geminiCode() {
+function updatedCode() {
     const searchBtn = document.querySelector('button');
     const searchInput = document.querySelector('#usernameInput');
     const loading = document.querySelector('#loadingAnimation')
@@ -116,7 +116,7 @@ function geminiCode() {
                     bio // Bio field bhi add kiya gaya hai
                 } = data;
                 userCard.innerHTML = `
-                <div class="flex-shrink-0 w-full m-auto">
+                <div class="flex-shrink-0 m-auto">
                     <img
                         src=${avatar_url}
                         alt="Placeholder Avatar"
