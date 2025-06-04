@@ -161,4 +161,4 @@ function updatedCode() {
     )
 }
 
-geminiCode();
+updatedCode();
