@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub User Finder</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles matching the "Full Stack Web Development" post */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #121212; /* Very dark, almost black background from the post */
+            color: #e2e8f0; /* Light text for contrast */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            padding: 4rem 1rem;
+            box-sizing: border-box;
+        }
+
+        /* Input and button focus styles - changed to a more subtle vibrant green glow */
+        input:focus,
+        button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 255, 0, 0.3); /* Green focus ring */
+        }
+
+        /* Card background - slightly lighter than body, but still dark */
+        .dark-card-bg {
+            background-color: #1E1E1E; /* Slightly lighter dark for main card */
+            border: 1px solid #333333; /* Subtle dark border */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Add a subtle shadow for depth */
+        }
+
+        /* Input background - a bit lighter than card, still dark */
+        .dark-input-bg {
+            background-color: #2D2D2D; /* Dark input background */
+            border: 1px solid #444444; /* Darker border for input */
+        }
+
+        /* --- Shimmer Loading Animation --- */
+        @keyframes shimmer {
+            0% {
+                background-position: -468px 0;
+            }
+            100% {
+                background-position: 468px 0;
+            }
+        }
+
+        .shimmer-circle,
+        .shimmer-line {
+            background-color: #333333; /* Base color for the skeleton */
+            background-image: linear-gradient(to right, #333333 0%, #444444 20%, #333333 40%, #333333 100%); /* The 'light' effect */
+            background-repeat: no-repeat;
+            animation: shimmer 1.5s infinite linear;
+        }
+
+        .shimmer-circle {
+            background-size: 200% 100%;
+            border-radius: 9999px; /* full rounded */
+        }
+
+        .shimmer-line {
+            background-size: 200% 100%;
+            border-radius: 0.25rem; /* small rounding */
+        }
+
+        /* --- "User Not Found" Animation --- */
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            10% {
+                transform: translateX(-5px);
+            }
+            20% {
+                transform: translateX(5px);
+            }
+            30% {
+                transform: translateX(-5px);
+            }
+            40% {
+                transform: translateX(5px);
+            }
+            50% {
+                transform: translateX(-5px);
+            }
+            60% {
+                transform: translateX(5px);
+            }
+            70% {
+                transform: translateX(-5px);
+            }
+            80% {
+                transform: translateX(5px);
+            }
+            90% {
+                transform: translateX(-5px);
+            }
+        }
+
+        .not-found-container {
+            animation: fadeInScale 0.3s ease-out forwards;
+            display: none; /* Controlled by JS show/hidden classes */
+            text-align: center;
+            height: 100%; /* Take full height of parent */
+            width: 100%; /* Take full width of parent */
+            min-height: 160px; /* Ensure it takes up space like the card */
+            flex-direction: column; /* Ensure vertical stacking for icon and text */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .not-found-icon {
+            animation: shake 0.8s ease-in-out; /* Shake once */
+            color: #FF6666; /* Softer red/orange for error, distinct from green */
+            margin-bottom: 1rem;
+        }
+
+        .not-found-text {
+            color: #E0E0E0; /* Light gray text */
+            animation: fadeInScale 0.5s ease-out 0.1s forwards; /* Delayed fade in for text */
+            font-size: 1.125rem; /* text-lg */
+            margin-bottom: 0.5rem;
+        }
+
+        .not-found-subtext {
+            color: #B0B0B0; /* Slightly darker gray for subtext */
+            animation: fadeInScale 0.5s ease-out 0.2s forwards; /* Further delayed fade in for subtext */
+            font-size: 0.9rem; /* text-sm */
+        }
+
+        /* Utilities for toggling visibility (JS would handle this) */
+        .show-element {
+            display: flex; /* or block, grid based on content */
+        }
+
+        .hidden-element {
+            display: none;
+        }
+
+        /* Custom scrollbar for better look on dark theme */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #2d3748; /* Darker track */
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #667e96; /* Lighter thumb color */
+            border-radius: 10px;
+            border: 2px solid #2d3748; /* Border to match track */
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; /* Even lighter on hover */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="w-full max-w-2xl mx-auto px-4">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2 text-white">GitHub User Finder</h1>
+            <p class="text-gray-400 text-lg md:text-xl">Search and view GitHub user profiles in style</p>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-4 mb-8 dark-card-bg rounded-lg p-4">
+            <input type="text" id="usernameInput" placeholder="Enter GitHub username"
+                class="flex-grow p-3 text-lg dark-input-bg text-white rounded-md placeholder-gray-400 focus:outline-none focus:ring-0"
+                value="" aria-label="GitHub username input" />
+            <button
+                class="px-8 py-3 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors duration-200 focus:outline-none focus:ring-0"
+                aria-label="Search GitHub user">
+                Search
+            </button>
+        </div>
+
+        <div class="dark-card-bg rounded-lg p-6 min-h-[160px] flex items-center justify-center relative">
+            <div id="notFoundAnimation" class="not-found-container hidden-element">
+                <svg class="not-found-icon w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p class="not-found-text">User Not Found</p>
+                <p class="not-found-subtext">Please check the username and try again.</p>
+            </div>
+
+            <div id="loadingAnimation" class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6 w-full hidden-element">
+                <div class="w-24 h-24 rounded-full shimmer-circle flex-shrink-0"></div>
+                <div class="flex-grow space-y-3 w-full sm:w-auto"> <div class="h-6 w-3/4 shimmer-line"></div>
+                    <div class="h-4 w-full shimmer-line"></div>
+                    <div class="h-4 w-5/6 shimmer-line"></div>
+                    <div class="flex flex-wrap gap-x-4 gap-y-2 mt-4"> <div class="h-3 w-16 shimmer-line"></div>
+                        <div class="h-3 w-20 shimmer-line"></div>
+                        <div class="h-3 w-12 shimmer-line"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="userDataDisplay" class="flex flex-col md:flex-row items-start md:items-start space-y-6 md:space-y-0 md:space-x-8 w-full">
+                
+            </div>
+        </div>
+
+        <div class="text-center mt-6 text-gray-500 text-sm">
+            Built with <span class="text-red-500">&hearts;</span> By <a class="hover:underline text-semibold" href="https://github.com/HanzlaCoding">@HanzlaCoding</a>
+        </div>
+
+        <script src="script.js"></script>
+</body>
+
+</html>
