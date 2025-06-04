@@ -42,7 +42,7 @@ function myCode() {
                         >
                     </div>
                 
-                    <div class="flex-grow text-gray-200 w-full"> <div class="">
+                    <div class="flex-grow text-gray-200"> <div class="">
                             <h2 class="text-sm md:text-2xl font-bold text-white leading-tight">${name}</h2>
                             <p class="text-blue-400 text-base md:text-lg mt-1 md:mt-0">@${login}</p>
                         </div>
